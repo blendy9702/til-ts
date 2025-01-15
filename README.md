@@ -1,146 +1,274 @@
-# tsconfig.json 설정하기
+# tsconfig.json 의 셋팅은 회사기준 별도
 
-## 1. 여러 개의 ts 컴파일하기 옵션
+# package.json : npm 명세서
 
-- `tsc src/index.ts` 명령어로 하나의 ts 파일을 컴파일하면 하나의 js 파일이 생성된다.
-- `tsc src/index.ts src/test.ts` 명령어로 여러 개의 ts 파일을 컴파일하면 여러 개의 js 파일이 생성된다.
+# 타입스크립트란?
 
-- include 컴파일 옵션
-  : 터미널에 tsc 명령어를 입력하면 모든 파일을 컴파일함.
+- `변수, 매개변수, 함수리턴값의 타입(데이터 종류)를 작성`해주는 것
 
-```json
-{
-  "include": ["src/**/*"]
-}
+## 어노테이션(Annotation)
+
+- 주석, 부가정보
+- 코드 설명과 추가적인 정보를 제공하는 것을 말함.
+
+### typescript 어노테이션
+
+```ts
+const 변수명 : 데이터 타입;
+function 함수명(매개변수 : 데이터타입) : 리턴타입 {}
 ```
 
-## 2. js 버전 선택 옵션
+### 메타데이터 어노테이션
 
-: `skipLibCheck` (라이브러리 체크 skip 하기)
+- 일반적인 자바스크립트와 달리 Node.js 또는 Spring 에서 자주 본다.
+- @기호를 어노테이션 이라고 한다.
+- @추가적인 정보를 제공하는 기능도 부여한다.
 
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true
-  }
-}
+```java
+@Annotation
+@Entity
+@Table(name = "테이블명")
+public void 함수명() {}
 ```
 
-## 3. 모듈 시스템 지정 옵션
+## ts 어노테이션을 이용한 기본 데이터(Primitive) 종류 명시
 
-- 모듈은 외부 js 기능을 모아서 파일관리
-- commonJS (require, module.exports)의 방식
-  : Node.js 의 기본 방식
-- ES6 (import, export)의 방식
-  : 모듈 시스템을 사용하는 방식
+### 1. 변수 어노테이션
 
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext"
-  }
-}
+- `const 변수명 : 데이터종류 = 값;`
+
+```ts
+let num: number = 1;
+let num1: number = 1.5;
+let num2: number = 0x10;
+let num3: number = Infinity;
+let num4: number = -Infinity;
+let str: string = "안녕";
+let bool: boolean = true;
+let un: undefined = undefined;
+let nu: null = null;
+
+let hi: "안녕" = "안녕";
+hi = "반가워"; // 오류
+
+const age: 5 = 10;
 ```
 
-## 4. 특정 폴더에 js 결과물 생성하기
+### 2. 타입추론을 확인하고 잘못된 추론이면 직접 관여한다.
 
-- `outDir` 옵션
-  : 컴파일 결과물을 특정 폴더에 생서하기 위한 옵션
+- 일단 타입추론을 적극적으로 반영한다.
+- 필요시에 어노테이션을 변경한다.
 
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "outDir": "./dist"
-  }
-}
+```ts
+let num: number | string = 1;
+const go = "안녕";
+num = "hello";
 ```
 
-## 5. strict 옵션
+### 3. ts의 데이터 종류
 
-- 컴파일러가 코드를 더 엄격하게 검사하도록 하는 옵션
-- 모든 엄격한 검사 옵션을 활성화 함
-- 예외로 기존 js 파일을 마이그레이션 하는 경우 가끔 false로 셋팅
+- unknown
+- any
+- null
+- void
+- undefined
+- never
+- number
+- Number Enum
+- bigint
+- string
+- String Enum
+- symbol
+- unique symbol
+- object
+- array
+- tuple
+- function
+- constructor
 
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "outDir": "./dist",
-    "strict": true
-  }
-}
+## 객체 중 배열과 튜플
+
+### 1. 배열
+
+- 배열을 만드는 법 1.
+
+```ts
+const arr = [1, 2, 3];
+console.log(arr);
 ```
 
-## 6. 중복 선언 허용여부 설정
+- 배열을 만드는 법 2. (어노테이션 정의하기)
 
-- `moduleDetection` 옵션
-  : 모듈 검색 방법을 설정하는 옵션
-  : `force` : 모듈 검색 방법을 강제로 설정
-  : `auto` : 모듈 검색 방법을 자동으로 설정
-
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "outDir": "./dist",
-    "strict": true,
-    "moduleDetection": "force"
-  }
-}
+```ts
+const arr2: number[] = [1, 2, 3];
 ```
 
-## 7. 일반 js 파일 포함 허용
+- 배열을 만드는 법3.
 
-- `allowJs` 옵션
-  : 일반 js 파일을 포함하여 컴파일하는 옵션
-
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "outDir": "./dist",
-    "strict": true,
-    "moduleDetection": "force",
-    "allowJs": true
-  }
-}
+```ts
+const arr3: Array<number> = [1, 2, 3];
 ```
 
-## 8. jsx 파일 포함 허용
+```ts
+// 배열
+const arr = [1, 2, 3];
+const arr2: number[] = [1, 2, 3];
+// 제네릭 이라는 문법 활용시 <데이터종류>
+const arr3: Array<number | string> = [1, 2, 3];
 
-- `jsx` 옵션
-  : jsx 파일을 포함하여 컴파일하는 옵션
+arr3[0] = "반가워"; // 오류
 
-```json
-{
-  "include": ["src/**/*"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "outDir": "./dist",
-    "strict": true,
-    "moduleDetection": "force",
-    "allowJs": true,
-    "jsx": "react-jsx"
-  }
-}
+// 배열
+const arr4 = ["안녕", "반가워"];
+const arr5: string[] = ["안녕", "반가워"];
+// 제네릭 이라는 문법 활용시 <데이터종류>
+const arr6: Array<number | string> = ["안녕", "반가워"];
+arr6[1] = 5000; // 오류
+
+// 배열
+const arr7 = [1000, "사과"];
+const arr8: (number | string)[] = [1000, "사과"];
+const arr9: Array<number | string | boolean> = [1000, "사과"];
+
+arr9[1] = false; // 요로 타입 오류
+
+// 객체 리터럴 배열
+const todos = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+const todos2: {
+  id: number;
+  title: string;
+  completed: boolean;
+}[] = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+
+const todos3: Array<{
+  id: number;
+  title: string;
+  completed: boolean;
+}> = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+```
+
+### 2. 튜플
+
+- Tuple 은 ts에만 있다.
+- Tuple 은 배열의 어노테이션이다.
+- Tuple 은 배열의 길이와 데이터 종류를 고정해 버림.
+- Tuple 은 배열의 요소를 추가, 삭제 못함.
+
+```ts
+// 튜플
+let arr: [number, number, number | string] = [1, 2, 3, 4];
+arr = [4, 5, 6];
+arr = [4, 5, 6, 7]; // 길이 오류
+arr.push(7); // 메서드
+arr.push(7);
+arr = [1, 3, "안녕"]; // 타입 오류
+
+const arr2: [number, number, number] = [1, 2, 3];
+// 제네릭 이라는 문법 활용시 <데이터종류>
+const arr3: [number | string, number, number] = [1, 2, 3];
+
+arr3[0] = "반가워"; // 오류
+
+// 배열
+const arr4: [string, string] = ["안녕", "반가워"];
+const arr5: [string, string] = ["안녕", "반가워"];
+// 제네릭 이라는 문법 활용시 <데이터종류>
+const arr6: [string, string] = ["안녕", "반가워"];
+arr6[1] = 5000; // 오류
+
+// 배열
+const arr7: [number, string] = [1000, "사과"];
+const arr8: [number, string] = [1000, "사과"];
+const arr9: [number, string] = [1000, "사과"];
+
+arr9[1] = false; // 요로 타입 오류
+
+// 객체 리터럴 배열
+const todos: [
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean }
+] = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+const todos2: [
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean }
+] = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+
+const todos3: [
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean },
+  { id: number; title: string; completed: boolean }
+] = [
+  { id: 1, title: "안녕", completed: false },
+  { id: 2, title: "리액트", completed: true },
+  { id: 3, title: "타입스크립트", completed: false },
+];
+```
+
+### 3. 배열과 튜플의 메소드는 동일함.
+
+- 어차피 배열이다.
+- pop, push 는 정상 작동 되어버린다.
+- 그래서 튜플을 안쓰게 된다. (튜플 사용경험이 적어짐)
+
+## 객체 리터럴
+
+```ts
+let user: {
+  name: string;
+  age: number;
+} = {
+  name: "hong",
+  age: 10,
+};
+
+let user2: {
+  name: string;
+  age: number;
+} = {
+  name: "hong",
+  age: 10,
+};
+
+// 문제발생
+// 옵션을 제공을 하자.
+let user3: {
+  name: string;
+  age: number;
+  job?: string; // 옵션 적용
+} = {
+  name: "hong",
+  age: 10,
+};
+user3.job = "student"; // 오류
+// 문제발생
+let user4: {
+  readonly name: string; // 코딩중변경 금지
+  age: number;
+} = {
+  name: "hong",
+  age: 10,
+};
+user4.name = "Blame"; // 오류
 ```
