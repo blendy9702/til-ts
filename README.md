@@ -460,7 +460,258 @@ age = "안녕";
 ## unknown
 
 - any와 흡사함. 하지만 큰 차이가 있다.
+- 타입을 `if 문`과 `typeof` 로 좁혀가면서 검사를 해야 함.
+  : 타입 좁히기, 타입가드
+
+- `타입 단언`(type assertion)
+  : `맞으니까 믿어라` 라고 알려주는 문법
+
+```ts
+let age: unknown = "hello";
+if (typeof age === "string") {
+  console.log(age.toUpperCase());
+}
+console.log((age as string).toUpperCase());
+```
+
+## any 와 unknown 차이를 확실히 구분해 봐요.
+
+```ts
+// any 와 unknown 의 차이를 이해하자.
+// js 데이터처리와 가장 흡사
+let anything: any = "Hello, world";
+anything = 123;
+anything.toUpperCase(); // 오류 문자 적용
+anything.toFixed(2); // 숫자 적용
+
+let anythingUn: unknown = "Hello, world";
+anythingUn = 123;
+// any 보다는 unknow을 사용하세요.
+// 단 타입을 검사하는 조건을 넣어서 안전하게 사용하세요.
+if (typeof anythingUn === "string") {
+  anythingUn.toUpperCase(); // 오류 문자 적용
+}
+if (typeof anythingUn === "number") {
+  anythingUn.toFixed(2); // 숫자 적용
+}
+```
+
+```ts
+// 변수 타입
+// 매개 변수 타입 (학습 안함)
+// 함수 리턴 타입 (학습 안함)
+function processAny(word: any) {
+  console.log(word.toUpperCase());
+}
+processAny("hello");
+processAny(123);
+
+function processUnknown(word: unknown) {
+  // unkonw 은 type guard 를 활용하라.
+  //  타입 좁히기
+  if (typeof word === "string") {
+    console.log(word.toUpperCase());
+  } else {
+    console.log("글자를 전달하세요.");
+  }
+}
+processUnknown("hello");
+processUnknown(123);
+```
+
+```ts
+function processAny(person: any) {
+  console.log(person.nickName.toUpperCase());
+}
+processAny({ nickName: "홍", age: 10 });
+processAny({ age: 10 });
+
+function processUnknown(person: unknown) {
+  // unkonw 은 type guard 를 활용하라.
+  //  타입 좁히기
+  if (
+    typeof person === "object" && // person이 객체인지 확인
+    person !== null && // null인지 확인
+    "nickName" in person && // nickName 속성이 있는지 확인
+    typeof person.nickName === "string" // nickName이 문자열인지 확인
+  ) {
+    console.log(person.nickName.toUpperCase());
+  } else {
+    console.log("nickName 속성이 없거나 유효하지 않습니다.");
+  }
+
+  if (
+    typeof person === "object" && // person이 객체인지 확인
+    person !== null && // null인지 확인
+    "age" in person && // nickName 속성이 있는지 확인
+    typeof person.age === "number" // nickName이 문자열인지 확인
+  ) {
+    console.log(person.age.toFixed(2));
+  } else {
+    console.log("age 속성이 없거나 유효하지 않습니다.");
+  }
+}
+processUnknown({ nickName: "홍", age: 10 });
+processUnknown({ age: 10 });
+```
+
+```ts
+function processAny(person: any) {
+  console.log(person[0].toUpperCase());
+}
+processAny(["hong", "doori"]);
+processAny([123, 456]);
+
+function processUnknown(person: unknown) {
+  if (Array.isArray(person) && typeof person[0] === "string") {
+    console.log(person[0].toUpperCase());
+  } else {
+    console.log("잘못된 배열입니다.");
+  }
+}
+processAny(["hong", "doori"]);
+processAny([123, 456]);
+```
 
 ## never
 
+- "절대로 일어나면 안된다" 라는 표현. (불가능한 상황)
+- "절대로 끝나지 않는다." 라는 표현. (한무루프)
+- 절대 발생하지 안는 상태를 표현할 때
+- 끝나지 던지는 함수 않는 함수
+- 불가능한 상태 처리 등에 활용
+- 타입 안정성을 높이고, 예외처리를 명확하게 해줌.
+
+```ts
+function go(): never {
+  while (1) {}
+}
+
+function say() {
+  throw new Error("error");
+}
+```
+
+```ts
+type Animal = "cat" | "dog" | "bird";
+let a: Animal = "cat";
+a = "dog";
+a = "bird";
+a = "hores"; // 에러
+
+// Animal 에 타입으로 정의한 것 외에는 값이 절대 존재하면 안됨
+// 위의 문장을 어노테이션으로 타입을 표현 해보자.
+
+function say(who: Animal): string {
+  if (who === "cat") {
+    return "고양이";
+  }
+  if (who === "dog") {
+    return "멍머이";
+  }
+  if (who === "bird") {
+    return "새";
+  } else {
+    // why come in here the code?
+    const no: never = who;
+    throw new Error(`no type: ${no}`);
+  }
+}
+
+say("horse"); // 오류가 있어도 js 는 만들어 짐
+```
+
+- 아무 값도 반환하지 않아요를 정확히 명시하고 싶은 경우.
+
+```ts
+function throwError(message: string): never {
+  throw new Error(message);
+}
+
+throwError("프로그램 중지");
+```
+
+- 무한루프 함수
+
+```ts
+function loop(): never {
+  while (true) {
+    console.log("한무 츠쿠요미");
+  }
+}
+
+loop();
+```
+
+- 언제 사용할까?
+  - switch, if~else 등 모든 경우를 처리한 후
+  - 항상 에러를 던져야 하는 함수
+  - 무한 루프로 절대 종료되지 않는 함수
+  - 명확한 코드 흐름 안내
+
 ## void
+
+- `아무것도 없다`는 의미
+- 주로 함수의 리턴 타입으로 사용
+
+```ts
+function func1(): string {
+  return "hello";
+}
+// 함수에서 리턴하는 값의 종류는 비어있어요.
+function func2(): void {
+  console.log("안녕");
+}
+// 값이 없다는 표현은 어떤게 있나요?
+// 함수 반환 return 이 없으면 기본이 void 입니다.
+function func3(): void {}
+
+// 아래 함수는 return undefined 작성
+// 명시적으로 undefined 를 리턴해야 한다면 작성해줘야 함.
+function func4(): undefined {
+  return undefined;
+}
+
+// 명시적으로 return 후 값이 없는 함수라면
+// void 를 리턴합니다.
+function func5(): void {
+  return;
+}
+
+// 명시적으로 null 을 리턴하고 싶다면
+// null 을 리턴해야 한다.
+function func6(): null {}
+function func7(): null {
+  return null;
+}
+```
+
+- void 를 사용하는 곳
+  - 아무것도 반환하지 않을 때
+  - 반환값이 필요없는 콜백 함수
+  - 비동기 함수에 리턴되는 값이 없음을 나타낼때
+
+```ts
+// 비동기 함수
+async function fetchGettodo(): Promise<void> {
+  const res = await fetch("주소");
+}
+async function fetchGettodoOne(): Promise<string> {
+  const res = await fetch("주소");
+  return "hello";
+}
+
+async function fetchPostTodo(): Promise<boolean> {
+  const res = await fetch("주소");
+  return true;
+}
+
+type Todo = {
+  id: number;
+  title: string;
+};
+async function fetchSortTodo(): Promise<Todo> {
+  const res = await fetch("주소");
+  return { id: 1, title: "안녕" };
+}
+```

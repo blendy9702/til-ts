@@ -1,9 +1,22 @@
-let age: any = 15;
-age = 100;
-age = "안녕";
+// 비동기 함수
+async function fetchGettodo(): Promise<void> {
+  const res = await fetch("주소");
+}
+async function fetchGettodoOne(): Promise<string> {
+  const res = await fetch("주소");
+  return "hello";
+}
 
-let ageUnknown: unknown = 15;
-ageUnknown = 100;
-ageUnknown = "안녕";
+async function fetchPostTodo(): Promise<boolean> {
+  const res = await fetch("주소");
+  return true;
+}
 
-// any 와 unknown 의 차이점
+type Todo = {
+  id: number;
+  title: string;
+};
+async function fetchSortTodo(): Promise<Todo> {
+  const res = await fetch("주소");
+  return { id: 1, title: "안녕" };
+}
