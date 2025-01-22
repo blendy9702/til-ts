@@ -1,10 +1,13 @@
-type Person = { name: string };
-type Employee = { company: string };
-type Sample = Person & Employee;
+let num: number = 10 as never;
+// 10 은 number 이고 never 는 모든 타입의 서브타입
+// 10 은 수퍼타입이므로 단언이 가능하다.
 
-// 속성이 한개만 누락되어도 오류.
-const whoA: Sample = { name: "hong" }; // 오류
-const whoB: Sample = { company: "green" }; // 오류
+let num2 = 10 as unknown;
+// 10 은 number 이고 unknown 은 최상위 수퍼타입
+// 10 은 unknown 의 서브 타입이므로 단언이 가능
 
-// Sample 타입은, Person 과 Employee를 모두 만족하는 타입이다.
-const whoC: Sample = { company: "green", name: "hong" }; // 정상
+let num3 = 10 as string;
+// 10 은 number 이고 string 은 number 수퍼, 서브 타입이 아니므로 단언이 불가능
+
+// 아래는 좋지 않다
+let num4 = 10 as unknown as string;
