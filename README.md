@@ -1,116 +1,73 @@
-# 타입 단언(Type Assertion)
+# 타입 좁히기(Type Narrowing)
 
-- `이제부터 타입스크립트 타입은 내가 정한다`
-- 개발자가 타입을 보증하니까 검사 ㄴㄴ
-- 컴파일러 속이는 과정
+- 값의 타입을 조금씩 구체적으로 좁혀서 사용하는 것.
+- 예를 들면, string | number 가 있는데
+- string 과 number 에 따라 기능 별도로 구현하는것
+- 조건문과 타입 체크를 사용해서 좁혀나감
+- if 조건문을 이용해서 타입 좁히는 과정을 흔히 `타입 가드` 라고 합니다.
 
-```ts
-type Person = { name: string; age: number };
+## 1. `typeof` 로 타입 좁히기
 
-// 아래는 타입추론에서 : {} 어노테이션으로 판단
-// 프로퍼티 name, age가 없으므로 오류
-let who = {};
-who.name = "hong";
-who.age = 100;
-
-// 필수 프로퍼티가 할당 안됨.
-let who2: { name: string; age: number } = {};
-
-// 옵션은 개발자의 의도가 아닌 회피 방법
-let who3: { name?: string; age?: number } = {};
-
-// 최종 책임을 개발자가 지겠다. 타입 검사 취소
-let who4 = {} as Person;
-who4.name = "hong";
-who4.age = 12;
-// who4.go = 100; // 잘 체크한다.
-```
-
-## 1. any 타입을 명확한 타입으로 단언
+- 값의 타입을 확인하고 조건에 따라서 실행
 
 ```ts
-let value: any = "hello";
-let count: number = (value as string).length;
-```
-
-## 2. DOM 을 활용할 때
-
-```ts
-const root = document.getElementById("root") as HTMLElement;
-const inputTag = document.querySelector("input");
-(inputTag as HTMLInputElement).value = "hi";
-```
-
-## 3. 유니온 타입중 하나를 지정하기
-
-```ts
-type User = { name: string };
-type Admin = { name: string; admin: boolean };
-let person: User | Admin = { name: "hong", admin: true };
-console.log((person as Admin).name);
-```
-
-## 4. Null 이 아닌 값으로 단언
-
-- 이거 절대 null 아니라고 개발자가 알려줌
-
-```ts
-let tag = document.querySelector("div");
-// 절대 null 아니라고 알려주기
-(tag as HTMLDivElement).innerHTML = "hello, world";
-```
-
-## 5. const 단언
-
-- 아주 편리하게 사용 가능.
-
-```ts
-let num = 10 as const;
-
-// as const 활용시 readonly 가 셋팅되서 변경 불가
-let animal = {
-  name: "cat",
-  age: 10,
-} as const;
-animal.age = 10;
-
-// 아래처럼 된다
-let animal2: {
-  readonly name: "cat";
-  readonly age: 10;
-};
-```
-
-## 6. 타입 좁히기(Type Narrowing) 함께 활용
-
-```ts
-function show(value: string | number) {
-  // 타입 좁히기
+function func(value: string | number | Date) {
   if (typeof value === "string") {
-    console.log((value as string).toUpperCase());
-  } else {
-    console.log((value as number).toFixed(2));
+    value.toUpperCase();
+  } else if (typeof value === "number") {
+    value.toFixed(2);
+  } else if (typeof value === "object") {
+    // 이건 좀 위험해 보임
+    // Date 라는 것을 보장받지 못함.
+    value.getTime();
   }
 }
+const obj = [1, 2, 3];
+func(obj);
 ```
 
-## 7. 타입단언 사용시 주의 유형.
-
-- 모든 타입을 타입 단언으로 해결되지는 않는다.
-- 수퍼타입과 서브타입을 고민해야 한다.
+## 2. `instanceof` 로 타입 좁히기
 
 ```ts
-let num: number = 10 as never;
-// 10 은 number 이고 never 는 모든 타입의 서브타입
-// 10 은 수퍼타입이므로 단언이 가능하다.
+function func(value: string | number | Date) {
+  if (typeof value === "string") {
+    value.toUpperCase();
+  } else if (typeof value === "number") {
+    value.toFixed(2);
+  } else if (value instanceof Date) {
+    // Date 라는 것을 보장받음
+    value.getTime();
+  }
+}
+const obj = [1, 2, 3];
+func(obj);
+```
 
-let num2 = 10 as unknown;
-// 10 은 number 이고 unknown 은 최상위 수퍼타입
-// 10 은 unknown 의 서브 타입이므로 단언이 가능
+## 3. `in` 으로 타입 좁히기
 
-let num3 = 10 as string;
-// 10 은 number 이고 string 은 number 수퍼, 서브 타입이 아니므로 단언이 불가능
+- 객체에 특정 속성이 있는지 확인
 
-// 아래는 좋지 않다
-let num4 = 10 as unknown as string;
+```ts
+type Person = {
+  name: string;
+  age: number;
+};
+
+function func(value: string | number | Date | null | Person) {
+  if (typeof value === "string") {
+    value.toUpperCase();
+  } else if (typeof value === "number") {
+    value.toFixed(2);
+  } else if (value instanceof Date) {
+    // Date 라는 것을 보장받음
+    value.getTime();
+    // } else if (value instanceof Person) { // 오류
+    // } else if ("age" in value) { // 오류
+    // } else if (value && "age" in value) { // 성공
+  } else if (value as Person) {
+    // 성공
+    // 오류
+    console.log((value as Person).age);
+  }
+}
 ```
