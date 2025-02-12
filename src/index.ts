@@ -1,15 +1,11 @@
-// 아래 상황은 Person 인터페이스는 하나로 합쳐진다.
-interface Person {
-  name: string;
+// 함수 리턴타입에서 리턴종류를 모르면
+// any 또는 void 을 리턴한다.
+// 만약 원하는 것이 있다면 정확히 장성해야 한다.
+function showValue<T>(value: T) {
+  return value;
 }
-interface Person {
-  name: string;
-  age: number;
-}
-interface Male extends Person {
-  name: "MALE";
-}
-const who: Male = {
-  name: "홍", // 오류 발생
-  age: 10,
-};
+
+let test = showValue(10);
+let test2 = showValue("안녕");
+let test3 = showValue(true);
+let test4 = showValue([1, 2, 3]);
