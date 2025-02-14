@@ -1,11 +1,43 @@
-// 함수 리턴타입에서 리턴종류를 모르면
-// any 또는 void 을 리턴한다.
-// 만약 원하는 것이 있다면 정확히 장성해야 한다.
-function showValue<T>(value: T) {
-  return value;
+/**
+ * 함수 시그니처로 타입 구성
+ */
+
+// type 으로 함수의 타입 정의하기
+const runner = () => {
+  return ["아이유", "블랙핑크"].map((x) => x);
+};
+
+type Mapper = (x: string) => string;
+
+const runner2 = (callback: Mapper) => {
+  return ["아이유", "블랙핑크"].map(callback);
+};
+
+runner2((x) => `${x} 입니다`);
+
+type TwoMembers = (a: number, b: number) => number;
+
+// const twoFun: (a: number, b: number) => number
+const twoFun = (a: number, b: number): number => a + b;
+const twoFunT: TwoMembers = (a, b) => a + b;
+
+const add = (a: number, b: number): number => a + b;
+const minus = (a: number, b: number): number => a - b;
+const multi = (a: number, b: number): number => a * b;
+const divide = (a: number, b: number): number => a / b;
+
+const add2: TwoMembers = (a, b) => a + b;
+const minus2: TwoMembers = (a, b) => a - b;
+const multi2: TwoMembers = (a, b) => a * b;
+const divide2: TwoMembers = (a, b) => a / b;
+
+// interface 로 함수의 타입 정의하기
+interface ITwo {
+  // 키명 : 키값
+  (a: number, b: number): number;
 }
 
-let test = showValue(10);
-let test2 = showValue("안녕");
-let test3 = showValue(true);
-let test4 = showValue([1, 2, 3]);
+const add3: ITwo = (a, b) => a + b;
+const minus3: ITwo = (a, b) => a - b;
+const multi3: ITwo = (a, b) => a * b;
+const divide3: ITwo = (a, b) => a / b;
