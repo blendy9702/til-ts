@@ -60,13 +60,25 @@ const numberArr: number[] = [1, 2, 3];
 const stringArr: string[] = ["a", "b", "c"];
 const booleanArr: boolean[] = [true, false];
 const stringNumberArr: (string | number)[] = ["a", 1, "b", 5];
-const stringNumberBoolenaArr: (string | number | boolean)[] = ["a", 1, true, "b", 5];
+const stringNumberBoolenaArr: (string | number | boolean)[] = [
+  "a",
+  1,
+  true,
+  "b",
+  5,
+];
 // 제네릭 이용한다면?
 const numberArrG: Array<number> = [1, 2, 3];
 const stringArrG: Array<string> = ["a", "b", "c"];
 const booleanArrG: Array<boolean> = [true, false];
 const stringNumberArrG: Array<string | number> = ["a", 1, "b", 5];
-const stringNumberBoolenaArrG: Array<string | number | boolean> = ["a", 1, true, "b", 5];
+const stringNumberBoolenaArrG: Array<string | number | boolean> = [
+  "a",
+  1,
+  true,
+  "b",
+  5,
+];
 ```
 
 ## 오브젝트
@@ -553,7 +565,8 @@ if (typeof numberOrString3 === "string") {
 }
 
 // 조건문에서 특정 값을 할당해서 타입 좁히기
-let nullOrString4: null | string[] = Math.random() > 0.5 ? null : ["아이유", "블랙핑크"];
+let nullOrString4: null | string[] =
+  Math.random() > 0.5 ? null : ["아이유", "블랙핑크"];
 
 if (nullOrString4) {
   // let nullOrString4: string[]
@@ -580,7 +593,8 @@ if (numberOrString5 === stringOrBool) {
   stringOrBool;
 }
 
-let numberOrStringOrNull: number | string | null = Math.random() > 0.5 ? 123 : Math.random() > 0.5 ? "아이유" : null;
+let numberOrStringOrNull: number | string | null =
+  Math.random() > 0.5 ? 123 : Math.random() > 0.5 ? "아이유" : null;
 if (typeof numberOrStringOrNull === "number") {
   // let numberOrStringOrNull: number
   numberOrStringOrNull;
@@ -627,7 +641,10 @@ interface Animal {
   height?: number;
   breed?: string;
 }
-let animal: Animal = Math.random() > 0.5 ? { type: "human", height: 180 } : { type: "dog", breed: "스핑크스" };
+let animal: Animal =
+  Math.random() > 0.5
+    ? { type: "human", height: 180 }
+    : { type: "dog", breed: "스핑크스" };
 if (animal.type === "human") {
   animal.height;
 } else {
@@ -643,7 +660,10 @@ interface Dog2 {
   breed: string;
 }
 type HumanOrDog2 = Human2 | Dog2;
-let animal2: HumanOrDog2 = Math.random() > 0.5 ? { type: "human", height: 180 } : { type: "dog", breed: "스핑크스" };
+let animal2: HumanOrDog2 =
+  Math.random() > 0.5
+    ? { type: "human", height: 180 }
+    : { type: "dog", breed: "스핑크스" };
 if (animal2.type === "human") {
   // let animal2: Human2
   animal2;
@@ -785,3 +805,689 @@ const divide3: ITwo = (a, b) => a / b;
 ```
 
 # 함수 오버로딩
+
+- 코드가 복잡하기 때문에 이해만 해두도록 하자.
+
+```ts
+// 함수 오버로딩
+// 하나의 함수로 여러개의 처리를 진행하도록 구성
+// 매개 변수 1개, 매개변수 3개만 받아서 출력하는 함수
+// 그런데 함수의 이름은 같다.
+function showString(a: string): void {
+  console.log(a);
+}
+
+function showString2(a: string, b: string, c: string): void {
+  console.log(a, b, c);
+}
+
+// 3개로 처리
+function showString3(a: string, b?: string, c?: string): void {
+  if (b && c) {
+    console.log(a, b, c);
+  } else {
+    console.log(a);
+  }
+}
+
+showString("A");
+showString2("A", "B", "C");
+showString2("A", "B"); // 오류는 아닌데 원하지 않는 기능이라서 오류
+
+// 함수 오버로딩
+function showStringOver(a: string): void;
+function showStringOver(a: string, b: string, c: string): void;
+// 오버로딩 규현체
+function showStringOver(a: string, b?: string, c?: string): void {
+  if (b && c) {
+    console.log(a, b, c);
+  } else {
+    console.log(a);
+  }
+}
+
+showStringOver("A");
+showStringOver("A", "B", "C");
+// showStringOver("A", "B");// 오버로딩 정의에 없음
+```
+
+# Type Predicate(타입 프리디케이트)
+
+- 데이터타입 종류를 확인해서 데이터 타입 또는 boolean을 리턴타입
+
+```ts
+/**
+ * Type Predicate(타입 프리디케이트)
+ */
+
+// 숫자 데이터타입인지 아닌지 알아내는 함수
+// true 또는 false 만 알수 있다.
+// 리턴값의 타입은 알수 없다.
+// 리턴값의 타입을 알아낼 수는 없을까?
+function isNumber(변수명: any) {
+  return typeof 변수명 === "number";
+}
+// let a: boolean
+// 나는 a 가 number 라고 타입이 추론되기를 원했다.
+// 그런데 a가 boolean 이다.
+// 타입을 알아낼 수 없네.
+let a = isNumber(123);
+
+// let b: boolean
+let b = isNumber("안녕");
+
+// 나는 true / false 가 아니고
+// 리턴되는 값의 타입을 알고 싶다.
+// 그때 사용하는 게 타입 프리디케이트이다.
+function isNumber2(변수명: any): 변수명 is number {
+  return typeof 변수명 === "number";
+}
+// let a2: number
+let a2 = 123;
+if (isNumber2(a2)) {
+  // let a2: number
+  a2;
+}
+
+// let b2: string
+let b2 = "안녕";
+
+if (isNumber2(b2)) {
+  // let b2: never;
+  // 예는 원래 string 이었는데 never 로 변경되었다.
+  // never 는 존재할 수 없는 타입이다.
+  b2;
+}
+
+/**
+ * interface 에서 타입알아내기
+ */
+interface Dog {
+  name: string;
+  age: number;
+}
+interface Cat {
+  name: string;
+  breed: string;
+}
+type DogOrCat = Dog | Cat;
+
+// 나는 Dog 타입인지, Cat 타입인지 정확히 타입을 좁히고 싶다.
+// Dog 타입이라면 Dog 에 대한 코딩 처리
+// Cat 이라면 Cat 에 대한 코딩 처리
+// 여기서는 true/false 가 아닌 타입을 리턴 받고 싶다.
+
+// boolean 리턴
+function isDog(변수명: DogOrCat): boolean {
+  return (변수명 as Dog).age !== undefined;
+}
+
+// type 리턴
+function isDogTypeReturn(변수명: DogOrCat): 변수명 is Dog {
+  return (변수명 as Dog).age !== undefined;
+}
+
+const doge: DogOrCat = { name: "강아지", age: 5 };
+// true / false 체크 및 boolean
+// 분명히 const doge: DogOrCat 라고 타입을 정의했다.
+if (isDog(doge) === true) {
+  // 타입 좁히기 성공
+  // const doge: Dog
+  doge;
+  doge.age;
+} else {
+  // const doge: Dog 라고 나오면 이상한거 아닌가요?
+  doge;
+  doge.age;
+}
+// 타입 체크 및 타입 리턴
+// 분명히 const doge: DogOrCat 라고 타입을 정의했다.
+// 아래 구문에서는
+// const doge: Dog 로 변환이 된다.
+if (isDogTypeReturn(doge)) {
+  // 정확히 Dog 타입이 확인 되었으므로 dog 에 대한 코딩 처리 가능..
+  doge;
+  doge.age;
+} else {
+  // const doge: never 로 추론됨
+  // 아래는 타입이 never 로 변경되서 Dog 속성 사용 불가.
+  doge;
+  doge.age; // 오류 정확히 타입 체크 했으므로 오류가 맞다.
+}
+```
+
+# type 과 interface 의 차이 4;
+
+- 1 번은 type 과 interface 만드는 법이 다르다.
+
+```ts
+type A = { age: 1 };
+interface A {
+  age: 1;
+}
+```
+
+- 2 번은 type 에 데이터 타입 할당, interfce 는 불가능
+
+```ts
+type A = string;
+interface A string; // 이런 문법은 없다. {} 빠짐
+```
+
+- 3 번 type 과 interface 의 함수 시그니처 정의 차이
+
+```ts
+type A = (x: number) = number;
+interface A {
+  // 키명: 키값
+  (x: number): number;
+}
+```
+
+```ts
+// type 과 interface 의 차이 4
+
+// type 에서만 사용 가능
+type String = string;
+type unionT = string | number;
+type tupleT = [string, number];
+
+// interface 에서만 사용 가능
+// interface 합치기
+
+// 같은 이름으로 정의가 가능
+interface Box {
+  width: number;
+}
+interface Box {
+  // 같은이름 사용 가능, 타입 변경은 불가능.
+  width: string; // 오류
+  height: number;
+}
+
+// type은 같은이름 안됨
+// type Go = {}
+// type Go = {}
+
+// 참고
+class Review {
+  // 속성 : Property (인스턴스 에 소속)
+  getX = (x: string) => {
+    return x;
+  };
+  // 메서드 : Method (프로토타입 에 소속)
+  getXY = (x: string) => {
+    return x;
+  };
+}
+
+interface GetXnY {
+  // 프로퍼티 형식
+  getX: (x: number) => number;
+  getY: (y: number) => number;
+}
+
+interface GetXnY {
+  // 프로퍼티 형식
+  getX: (x: number) => number;
+  // getY: (x: number) => number;
+  // getY: (y: string) => number; // 오류 발생 (매개변수 타입 달라서)
+  getY: (y: number) => string; // 오류 발생 (리턴 타입 달라서)
+}
+
+// 메소드 방식으로 merging 하기.
+interface GetXnYMethod {
+  // 프로퍼티 형식
+  getXP: (x: number) => number;
+  getYP: (y: number) => number;
+
+  // 메서드 방식
+  getX(x: number): number;
+  getY(y: string): number; // 매개변수 타입 바꿔도 됨.
+}
+
+interface GetXnYMethod {
+  // 메서드 방식
+  getX(x: number): number;
+  getY(y: string): number; // 매개변수 타입 바꿔도 됨.
+  getY(y: number): string; // 리턴 타입 바꿔도 됨.
+  getY(y: number, z: string): string; // 매개변수 개수 바꿔도 됨.
+}
+
+const testM: GetXnYMethod = {
+  // (parameter) x: number
+  getX(x) {
+    return x;
+  },
+  // (parameter) y: string | number
+  getY(y) {
+    if (typeof y === "string") {
+      return y; // string 타입 리턴
+    } else {
+      return y; // number 타입 리턴
+    }
+  },
+};
+```
+
+# type 의 확장과 interface 의 확장
+
+```ts
+/**
+ * type 의 확장과 interface 의 확장
+ * 누군가가 정의한 type 과 interface 에 필요로 한
+ * 타입들을 추가로 기재하는 법
+ */
+// interface 확장 ( extends )
+interface IName {
+  name: string;
+}
+interface IAge extends IName {
+  age: number;
+}
+const iu: IAge = { age: 10, name: "아이유" };
+
+// type 의 확장 ( & 를 통해서 확장을 한다.)
+type TName = {
+  name: string;
+};
+type TAge = TName & {
+  age: number;
+};
+const bp: TAge = { age: 10, name: "아이유" };
+
+// 인터페이스를 type 을 이용해서 확장하기
+interface INameAge extends TName {
+  age: number;
+}
+const bts: INameAge = { age: 30, name: "bts" };
+
+// 인터페이스를 이용해서 인터섹션 가능하다.
+type TNameAge = IName & {
+  age: number;
+};
+
+/**
+ * 타입 여러개를 상속받아서 확장 하는 법
+ * & 를 이용한다.
+ */
+type DogName = {
+  name: string;
+};
+type DogAge = {
+  age: number;
+};
+type DogBreed = {
+  breed: string;
+};
+
+type Dog = DogName & DogAge & DogBreed;
+/**
+ * interface 여러개를 상속받아 확장
+ */
+interface CatName {
+  name: string;
+}
+interface CatAge {
+  age: number;
+}
+interface Cat extends CatName, CatAge {
+  breed: string;
+}
+
+/**
+ * Overriding
+ */
+type THeight = {
+  height: number;
+};
+type TRectangle = THeight & {
+  height: string;
+  width: number;
+};
+// string 과 number 를  & 하시면 never 타입이 나옴
+// never 는 존재할 수 없는 타입이다.
+const box: TRectangle = {
+  // height: never
+  // height: 10, // 오류발생
+
+  // height: never
+  // height: "10", // 오류발생
+
+  width: 10,
+};
+
+// 위와 같은 상황을 해결하려면
+type TWidth = {
+  width: string | number;
+};
+type TRectangle2 = TWidth & {
+  width: number;
+  height: number;
+};
+const box2: TRectangle2 = {
+  height: 10,
+  // (property) width: number
+  // 타입좁히기로 해결함
+  // 좋지는 않음
+
+  width: 10,
+};
+
+// 인터페이스의 예
+interface IHeight {
+  height: number;
+}
+interface IWidth {
+  width: number;
+}
+
+interface IRectangle extends IHeight {
+  height: number; // 타입을 반드시 맞추어준다.
+  // height: string // 타입오류 발생
+  width: number;
+}
+```
+
+# tuple
+
+- js 에는 존재하지 않음
+
+```ts
+// tuple
+// 요소의 데이터 타입, 개수를 지정할 수 있음
+// 무조건 순서에 맞는 타입의 요소를 넣어야 함.
+// tuple 도 배열
+
+let idolMembers: string[] = ["로제", "제니", "로우"];
+
+// 튜플
+let idolMembersTuple: [string, string, string] = ["로제", "제니", "로우"];
+// 무조건 순서에 맞는 타입의 요소를 넣어야 한다.
+let iu: [number, string] = [30, "아이유"];
+iu.push("소녀시대"); // js 에서 배열로 바뀌므로 오류없음.
+// tuple의 요소 개수를 지켜주려면
+let blackPink: readonly [number, string] = [30, "제니"];
+// blackPink.push("홍길동"); // 오류 : readonly 에 의해서 유지
+
+// 배열 값을 튜플로 정의하는 법
+// let idols: readonly [30, "제니"]
+let idols = [30, "제니"] as const;
+
+// Named Tuple
+// 요소 타입의 이름을 주는 문법
+let actors: [string, number] = ["이병헌", 50];
+let actors2: [Name: string, Age: number] = ["이병헌", 50];
+
+// tuple 과 tuple 할당
+let ages: [number, number] = [30, 20];
+// 아래는 가능
+let sampleAges: [number, number] = ages;
+
+// 아래는 불가능
+// let sampleAges2: [string, number] = ages;
+
+// 요소 개수가 안맞아서 오류
+// let sampleAges3: [number, number, number] = ages;
+
+// Multi Dimenstion Tuple
+
+const idol2Dtuple: [string, number][] = [
+  ["로제", 30],
+  ["제니", 20],
+];
+```
+
+# TS 객체 상세히 알아보기
+
+```ts
+// 객체
+
+let obj: {
+  age: number;
+  name: string;
+};
+let obj = {
+  age: 30,
+  name: "아이유",
+};
+interface IPerson {
+  age: number;
+  name: string;
+}
+type TPerson = {
+  age: number;
+  name: string;
+};
+
+// 속성 초과 검사
+// 객체 리터럴로 값을 할당하는 경우에만 ts 가 검사
+type TName = {
+  name: string;
+};
+type TAge = {
+  age: number;
+};
+// 객체 리터럴로 정의한 객체
+// 속성이 초과되었는지 검사를 ts 가 실행
+// 아래는 타입 정의가 없어서 실행 안하고 있음.
+const iu = {
+  name: "아이유",
+  age: 30,
+};
+
+const iu2: TName = {
+  name: "아이유",
+  // age: 30, // 오류발생(속성 초과)
+};
+
+// 객체 리터럴로 정의
+const iu3: TAge = {
+  age: 30,
+  // name: "아이유", // 오류발생(속성 초과)
+};
+
+// 아래 부터 조심해야 한다.
+const blackPink = {
+  age: 32,
+  name: "제니",
+};
+
+const blackPink2: TAge = blackPink; // 이게 된다고???
+// 변수 즉 객체리터럴이 아닌 경우는 초과검사를 ts 가 안함.
+blackPink.age; // 정상
+blackPink.name; // 오류로 잡힘
+```
+
+```ts
+// 중첩 속성 객체
+// - 중첩 속성을 가능하면 정의하지 말자
+// - 별도의 정의를 진행하는 것이 좋다.
+
+type Person = {
+  identity: {
+    name: string;
+    age: number;
+  };
+  country: string;
+};
+
+const iu: Person = {
+  identity: {
+    name: "아이유",
+    age: 30,
+  },
+  country: "한국",
+};
+// 중첩 ㄴㄴ
+type Identity = {
+  name: string;
+  age: number;
+};
+type TPerson = {
+  identity: Identity;
+  country: string;
+};
+
+const iu2: TPerson = {
+  identity: {
+    name: "아이유",
+    age: 30,
+  },
+  country: "한국",
+};
+```
+
+```ts
+// 객체 유니온
+
+const dogCat =
+  Math.random() > 0.5
+    ? { name: "멍머이", age: 3 }
+    : { name: "애옹이", breed: "러시안블루" };
+
+/*const dogCat: {
+  name: string;
+  age: number;
+  breed?: undefined;
+} | {
+  name: string;
+  breed: string;
+  age?: undefined;
+}*/
+
+dogCat.name;
+// (property) name: string
+dogCat.age;
+// (property) age: number | undefined
+dogCat.breed;
+// (property) breed: string | undefined
+
+// 타입스크립트는 가능한 타입 유추 오류 발생을 최소화 하려고 노력하자.
+interface Dog {
+  name: string;
+  age: number;
+}
+
+interface Cat {
+  name: string;
+  breed: string;
+}
+
+type DogCat = Dog | Cat;
+const dogCat2: DogCat =
+  Math.random() > 0.5
+    ? { name: "멍머이", age: 3 }
+    : { name: "애옹이", breed: "러시안블루" };
+dogCat2.name; // 정상
+// dogCat2.age; // 오류
+// dogCat2.breed; // 오류
+if ("age" in dogCat2) {
+  // const dogCat2: Dog
+  dogCat2;
+} else {
+  // const dogCat2: Cat
+  dogCat2;
+}
+```
+
+```ts
+// 객체 끼리의 인터섹션 &
+// 참고 (never)
+// type A = number & string;
+
+type PersonT = {
+  name: string;
+  age: number;
+};
+type CompanyT = {
+  company: string;
+  comNumber: number;
+};
+type PersonAndCompany = PersonT & CompanyT;
+// 모두 만족해야 한다.
+const ea: PersonAndCompany = {
+  age: 30,
+  name: "헤리스",
+  comNumber: 123,
+  company: "Electro Arts",
+};
+```
+
+# Key Value 맵핑
+
+- 키와 Value 값을 자동으로 맵핑 시키는 방법
+
+```ts
+// Key Value 맵핑
+
+enum State {
+  LOADING,
+  SUCCESS,
+  ERROR,
+  INITIAL,
+}
+// API 타입
+type ApiState = {
+  getUser: State;
+  paginateUser: State | undefined;
+  defeceUser: State | null;
+  getPost: State;
+};
+
+// API 타입 2
+type UserApiState = {
+  getUser: State;
+  paginateUser: State | undefined;
+  defeceUser: State | null;
+};
+
+// API 타입 3
+// 아래처럼 구성하면 타입이 변경이 일어나도 추가 작업이 없다.
+// 속성이 변화가 일어나도 한번에 모두 변화가 일어난다.
+type UserApiState2 = {
+  getUser: ApiState["getUser"];
+  paginateUser: ApiState["paginateUser"];
+  defeceUser: ApiState["defeceUser"];
+};
+
+// API 타입 4
+type UserApiState3 = {
+  [key in "getUser" | "paginateUser" | "defeceUser"]: ApiState[key];
+};
+
+// API 타입 5
+// 유틸리티 타입
+type UserApiState4 = Pick<ApiState, "getUser" | "paginateUser" | "defeceUser">;
+// Omit 원하는 것만 제외하는 경우
+type UserApiState5 = Omit<ApiState, "getPost">;
+
+/**
+ * keyof
+ * 속석 값을 타입으로 알아내기
+ */
+
+type Allkeys = keyof ApiState;
+const key1: Allkeys = "getUser";
+const key2: Allkeys = "paginateUser";
+const key3: Allkeys = "defeceUser";
+const key4: Allkeys = "getPost";
+// const key5: Allkeys = "Gogo"; // 오류 발생
+
+type UserApiState6 = {
+  [key in keyof ApiState]: ApiState[key];
+};
+
+// 유틸리티 사용해 보기
+// 항복 한개 빼기
+type UserApiState7 = {
+  // getPost 제외
+  [key in Exclude<keyof ApiState, "getPost">]: ApiState[key];
+};
+
+// 항복 한개 빼고 모두 옵션으로 바꾸기
+type UserApiState8 = {
+  // getPost 속성은 제거하고 나머지 뽑아서 정의
+  [key in Exclude<keyof ApiState, "getPost">]?: ApiState[key];
+};
+```

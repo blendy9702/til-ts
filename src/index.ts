@@ -1,43 +1,71 @@
+// Key Value 맵핑
+
+enum State {
+  LOADING,
+  SUCCESS,
+  ERROR,
+  INITIAL,
+}
+// API 타입
+type ApiState = {
+  getUser: State;
+  paginateUser: State | undefined;
+  defeceUser: State | null;
+  getPost: State;
+};
+
+// API 타입 2
+type UserApiState = {
+  getUser: State;
+  paginateUser: State | undefined;
+  defeceUser: State | null;
+};
+
+// API 타입 3
+// 아래처럼 구성하면 타입이 변경이 일어나도 추가 작업이 없다.
+// 속성이 변화가 일어나도 한번에 모두 변화가 일어난다.
+type UserApiState2 = {
+  getUser: ApiState["getUser"];
+  paginateUser: ApiState["paginateUser"];
+  defeceUser: ApiState["defeceUser"];
+};
+
+// API 타입 4
+type UserApiState3 = {
+  [key in "getUser" | "paginateUser" | "defeceUser"]: ApiState[key];
+};
+
+// API 타입 5
+// 유틸리티 타입
+type UserApiState4 = Pick<ApiState, "getUser" | "paginateUser" | "defeceUser">;
+// Omit 원하는 것만 제외하는 경우
+type UserApiState5 = Omit<ApiState, "getPost">;
+
 /**
- * 함수 시그니처로 타입 구성
+ * keyof
+ * 속석 값을 타입으로 알아내기
  */
 
-// type 으로 함수의 타입 정의하기
-const runner = () => {
-  return ["아이유", "블랙핑크"].map((x) => x);
+type Allkeys = keyof ApiState;
+const key1: Allkeys = "getUser";
+const key2: Allkeys = "paginateUser";
+const key3: Allkeys = "defeceUser";
+const key4: Allkeys = "getPost";
+// const key5: Allkeys = "Gogo"; // 오류 발생
+
+type UserApiState6 = {
+  [key in keyof ApiState]: ApiState[key];
 };
 
-type Mapper = (x: string) => string;
-
-const runner2 = (callback: Mapper) => {
-  return ["아이유", "블랙핑크"].map(callback);
+// 유틸리티 사용해 보기
+// 항복 한개 빼기
+type UserApiState7 = {
+  // getPost 제외
+  [key in Exclude<keyof ApiState, "getPost">]: ApiState[key];
 };
 
-runner2((x) => `${x} 입니다`);
-
-type TwoMembers = (a: number, b: number) => number;
-
-// const twoFun: (a: number, b: number) => number
-const twoFun = (a: number, b: number): number => a + b;
-const twoFunT: TwoMembers = (a, b) => a + b;
-
-const add = (a: number, b: number): number => a + b;
-const minus = (a: number, b: number): number => a - b;
-const multi = (a: number, b: number): number => a * b;
-const divide = (a: number, b: number): number => a / b;
-
-const add2: TwoMembers = (a, b) => a + b;
-const minus2: TwoMembers = (a, b) => a - b;
-const multi2: TwoMembers = (a, b) => a * b;
-const divide2: TwoMembers = (a, b) => a / b;
-
-// interface 로 함수의 타입 정의하기
-interface ITwo {
-  // 키명 : 키값
-  (a: number, b: number): number;
-}
-
-const add3: ITwo = (a, b) => a + b;
-const minus3: ITwo = (a, b) => a - b;
-const multi3: ITwo = (a, b) => a * b;
-const divide3: ITwo = (a, b) => a / b;
+// 항복 한개 빼고 모두 옵션으로 바꾸기
+type UserApiState8 = {
+  // getPost 속성은 제거하고 나머지 뽑아서 정의
+  [key in Exclude<keyof ApiState, "getPost">]?: ApiState[key];
+};
